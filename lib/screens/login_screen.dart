@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               Image.asset(
                 'assets/images/Lumé.png',
-                height: 185,
+                height: 300,
                 fit: BoxFit.contain,
               ),
               SizedBox(height: 8),
