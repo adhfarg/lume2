@@ -8,77 +8,123 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  String _email = '';
-  String _password = '';
+  final _usernameController = TextEditingController(text: 'Adam');
+  final _passwordController = TextEditingController(text: '1127');
 
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 32.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
                 'Lumé',
                 style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.purple),
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                ),
+                textAlign: TextAlign.center,
               ),
+              SizedBox(height: 8),
               Text(
                 'Certified Safe Dating',
-                style: TextStyle(fontSize: 16, color: Colors.purple),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
+                textAlign: TextAlign.center,
               ),
-              SizedBox(height: 40),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Email'),
-                validator: (value) =>
-                    value!.isEmpty ? 'Please enter your email' : null,
-                onSaved: (value) => _email = value!,
+              SizedBox(height: 48),
+              TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
               ),
-              SizedBox(height: 20),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Password'),
+              SizedBox(height: 16),
+              TextField(
+                controller: _passwordController,
                 obscureText: true,
-                validator: (value) =>
-                    value!.isEmpty ? 'Please enter your password' : null,
-                onSaved: (value) => _password = value!,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 24),
               ElevatedButton(
-                child: Text('Log In'),
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    bool success = await authService.signIn(_email, _password);
-                    if (success) {
-                      Navigator.pushReplacementNamed(context, '/');
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Invalid credentials')),
-                      );
-                    }
+                onPressed: () {
+                  if (_usernameController.text == 'Adam' &&
+                      _passwordController.text == '1127') {
+                    authService.signIn();
+                    Navigator.pushReplacementNamed(context, '/home');
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                            'Invalid credentials. Please use the demo login.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
                   }
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  foregroundColor:
+                      Colors.white, // This ensures white text color
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Log In',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white, // Explicitly set text color to white
+                  ),
+                ),
               ),
+              SizedBox(height: 16),
               TextButton(
                 onPressed: () {
-                  // Handle phone number login
+                  // TODO: Implement phone number login
                 },
-                child: Text('Use phone number instead',
-                    style: TextStyle(color: Colors.purple)),
+                child: Text(
+                  'Use phone number instead',
+                  style: TextStyle(
+                    color: Colors.deepPurple,
+                    fontSize: 14,
+                  ),
+                ),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }

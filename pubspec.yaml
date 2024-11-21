@@ -1,39 +1,33 @@
-name: lume
-description: "A dating app with certified health checks"
-publish_to: 'none'
+name: lume_dating_app
+description: A new Flutter project.
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=2.19.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.2
   provider: ^6.0.5
-  http: ^1.1.0
-  shared_preferences: ^2.2.2
+  card_swiper: ^2.0.4
   dio: ^5.3.2
   image_picker: ^1.0.4
-  permission_handler: ^10.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
-
-  # Uncomment and add paths to your assets here:
-  # assets:
-  #   - images/
-
-  # Uncomment and add custom fonts here if needed:
-  # fonts:
-  #   - family: CustomFont
-  #     fonts:
-  #       - asset: fonts/CustomFont-Regular.ttf
-  #       - asset: fonts/CustomFont-Bold.ttf
-  #         weight: 700
+  assets:
+    - assets/images/Lumé.png
+    - assets/images/user1.jpg
+    - assets/images/user2.jpg
+    - assets/images/user3.jpg
+    - assets/images/user4.jpg
+    - assets/images/user5.jpg

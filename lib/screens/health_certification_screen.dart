@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
-import '../services/auth_service.dart';
+import 'dart:io';
 import '../services/health_verification_service.dart';
 
 class HealthCertificationScreen extends StatefulWidget {
@@ -13,132 +11,195 @@ class HealthCertificationScreen extends StatefulWidget {
 
 class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _stdTest = '';
-  String _hivTest = '';
-  String _covidVaccination = '';
-  XFile? _testResultFile;
-  bool _isLoading = false;
+  final ImagePicker _picker = ImagePicker();
+  File? _documentImage;
+  DateTime? _lastTestDate;
+  Map<String, bool> _stiTests = {
+    'HIV': false,
+    'Syphilis': false,
+    'Gonorrhea': false,
+    'Chlamydia': false,
+    'Hepatitis': false,
+  };
 
-  Future<void> _pickFile() async {
-    try {
-      final status = await Permission.photos.request();
-      if (status.isGranted) {
-        final ImagePicker picker = ImagePicker();
-        final XFile? file = await picker.pickImage(source: ImageSource.gallery);
-        if (file != null) {
-          setState(() {
-            _testResultFile = file;
-          });
-        }
-      } else if (status.isDenied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  'Permission to access photos was denied. Please enable it in settings.')),
-        );
-      } else if (status.isPermanentlyDenied) {
-        openAppSettings();
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking file: ${e.toString()}')),
-      );
+  Future<void> _pickDocument() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _documentImage = File(image.path);
+      });
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _lastTestDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null && picked != _lastTestDate) {
+      setState(() {
+        _lastTestDate = picked;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context);
-    final healthVerificationService =
-        Provider.of<HealthVerificationService>(context, listen: false);
-
     return Scaffold(
-      appBar: AppBar(title: Text('Health Certification')),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: EdgeInsets.all(16.0),
-          children: [
-            TextFormField(
-              decoration: InputDecoration(labelText: 'STD Test Result'),
-              validator: (value) =>
-                  value!.isEmpty ? 'This field is required' : null,
-              onSaved: (value) => _stdTest = value!,
-            ),
-            TextFormField(
-              decoration: InputDecoration(labelText: 'HIV Test Result'),
-              validator: (value) =>
-                  value!.isEmpty ? 'This field is required' : null,
-              onSaved: (value) => _hivTest = value!,
-            ),
-            TextFormField(
-              decoration:
-                  InputDecoration(labelText: 'COVID-19 Vaccination Status'),
-              validator: (value) =>
-                  value!.isEmpty ? 'This field is required' : null,
-              onSaved: (value) => _covidVaccination = value!,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _pickFile,
-              child: Text(_testResultFile == null
-                  ? 'Upload Test Result'
-                  : 'Change Test Result'),
-            ),
-            if (_testResultFile != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text('File selected: ${_testResultFile!.name}'),
+      appBar: AppBar(
+        title: Text('Health Certification'),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Upload Health Documentation',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              child: _isLoading
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text('Submit Health Certification'),
-              onPressed: _isLoading
-                  ? null
-                  : () async {
-                      if (_formKey.currentState!.validate() &&
-                          _testResultFile != null) {
-                        _formKey.currentState!.save();
-                        setState(() => _isLoading = true);
-                        try {
-                          final certificationId =
-                              await healthVerificationService
-                                  .submitHealthCertification(
-                            authService.currentUserId!,
-                            {
-                              'stdTest': _stdTest,
-                              'hivTest': _hivTest,
-                              'covidVaccination': _covidVaccination,
-                            },
-                            _testResultFile!.path,
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text(
-                                    'Health certification submitted successfully')),
-                          );
-                          Navigator.pop(context);
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text(
-                                    'Error submitting health certification: ${e.toString()}')),
-                          );
-                        } finally {
-                          setState(() => _isLoading = false);
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(
-                                  'Please complete all fields and upload a test result')),
-                        );
-                      }
+              SizedBox(height: 16),
+              InkWell(
+                onTap: _pickDocument,
+                child: Container(
+                  width: double.infinity,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: _documentImage != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.file(
+                            _documentImage!,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.upload_file,
+                                size: 50, color: Colors.grey),
+                            Text('Tap to upload documentation'),
+                          ],
+                        ),
+                ),
+              ),
+              SizedBox(height: 24),
+              Text(
+                'Last Test Date',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              InkWell(
+                onTap: () => _selectDate(context),
+                child: Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _lastTestDate != null
+                            ? '${_lastTestDate!.year}-${_lastTestDate!.month.toString().padLeft(2, '0')}-${_lastTestDate!.day.toString().padLeft(2, '0')}'
+                            : 'Select date',
+                      ),
+                      Icon(Icons.calendar_today),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 24),
+              Text(
+                'STI Tests Completed',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              ..._stiTests.entries.map((entry) => CheckboxListTile(
+                    title: Text(entry.key),
+                    value: entry.value,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _stiTests[entry.key] = value ?? false;
+                      });
                     },
-            ),
-          ],
+                  )),
+              SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate() &&
+                      _documentImage != null &&
+                      _lastTestDate != null) {
+                    try {
+                      final healthService = HealthVerificationService();
+                      final certificationData = {
+                        'lastTestDate': _lastTestDate!.toIso8601String(),
+                        'stiTests': _stiTests,
+                      };
+
+                      await healthService.submitHealthCertification(
+                        'current_user_id', // Replace with actual user ID
+                        certificationData,
+                        _documentImage!.path,
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text(
+                                'Health certification submitted successfully')),
+                      );
+                      Navigator.pop(context);
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content:
+                                Text('Error submitting certification: $e')),
+                      );
+                    }
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text('Please fill in all required fields')),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Container(
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Submit Certification',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
