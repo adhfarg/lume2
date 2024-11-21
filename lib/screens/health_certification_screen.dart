@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../services/auth_service.dart';
 import '../services/health_verification_service.dart';
 
@@ -19,11 +20,30 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
   bool _isLoading = false;
 
   Future<void> _pickFile() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? file = await picker.pickImage(source: ImageSource.gallery);
-    setState(() {
-      _testResultFile = file;
-    });
+    try {
+      final status = await Permission.photos.request();
+      if (status.isGranted) {
+        final ImagePicker picker = ImagePicker();
+        final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+        if (file != null) {
+          setState(() {
+            _testResultFile = file;
+          });
+        }
+      } else if (status.isDenied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'Permission to access photos was denied. Please enable it in settings.')),
+        );
+      } else if (status.isPermanentlyDenied) {
+        openAppSettings();
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking file: ${e.toString()}')),
+      );
+    }
   }
 
   @override
@@ -65,6 +85,11 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
                   ? 'Upload Test Result'
                   : 'Change Test Result'),
             ),
+            if (_testResultFile != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text('File selected: ${_testResultFile!.name}'),
+              ),
             SizedBox(height: 20),
             ElevatedButton(
               child: _isLoading
