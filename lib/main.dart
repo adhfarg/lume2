@@ -4,6 +4,7 @@ import 'services/auth_service.dart';
 import 'services/health_verification_service.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/profile_screen.dart';
 
 void main() {
   runApp(
@@ -28,13 +29,14 @@ class MyApp extends StatelessWidget {
       ),
       home: Consumer<AuthService>(
         builder: (context, authService, _) {
-          if (authService.isAuthenticated) {
-            return HomeScreen();
-          } else {
-            return LoginScreen();
-          }
+          return authService.isAuthenticated ? HomeScreen() : LoginScreen();
         },
       ),
+      routes: {
+        '/login': (context) => LoginScreen(),
+        '/home': (context) => HomeScreen(),
+        '/profile': (context) => ProfileScreen(),
+      },
     );
   }
 }

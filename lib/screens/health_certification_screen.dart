@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/auth_service.dart';
 import '../services/health_verification_service.dart';
 
@@ -14,13 +15,22 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
   String _stdTest = '';
   String _hivTest = '';
   String _covidVaccination = '';
+  XFile? _testResultFile;
   bool _isLoading = false;
+
+  Future<void> _pickFile() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _testResultFile = file;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
     final healthVerificationService =
-        Provider.of<HealthVerificationService>(context);
+        Provider.of<HealthVerificationService>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(title: Text('Health Certification')),
@@ -50,25 +60,34 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
+              onPressed: _pickFile,
+              child: Text(_testResultFile == null
+                  ? 'Upload Test Result'
+                  : 'Change Test Result'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
               child: _isLoading
                   ? CircularProgressIndicator(color: Colors.white)
                   : Text('Submit Health Certification'),
               onPressed: _isLoading
                   ? null
                   : () async {
-                      if (_formKey.currentState!.validate()) {
+                      if (_formKey.currentState!.validate() &&
+                          _testResultFile != null) {
                         _formKey.currentState!.save();
                         setState(() => _isLoading = true);
                         try {
                           final certificationId =
                               await healthVerificationService
                                   .submitHealthCertification(
-                            authService.currentUser!.uid,
+                            authService.currentUserId!,
                             {
                               'stdTest': _stdTest,
                               'hivTest': _hivTest,
                               'covidVaccination': _covidVaccination,
                             },
+                            _testResultFile!.path,
                           );
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -85,6 +104,12 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
                         } finally {
                           setState(() => _isLoading = false);
                         }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text(
+                                  'Please complete all fields and upload a test result')),
+                        );
                       }
                     },
             ),

@@ -12,7 +12,7 @@ class HealthVerificationService {
         ));
 
   Future<String> submitHealthCertification(
-      String userId, Map<String, String> data) async {
+      String userId, Map<String, String> data, String path) async {
     final response = await _dio.post('/health-certification', data: {
       'userId': userId,
       ...data,

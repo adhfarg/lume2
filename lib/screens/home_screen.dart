@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:lume/services/auth_service.dart';
-import 'package:lume/screens/profile_screen.dart';
+import '../services/auth_service.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Lumé'),
+        title: Text('Lumé'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.person),
+            icon: Icon(Icons.person),
             onPressed: () {
               Navigator.push(
                 context,
@@ -22,14 +22,15 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: Icon(Icons.logout),
             onPressed: () {
-              Provider.of<AuthService>(context, listen: false).signOut();
+              authService.signOut();
+              Navigator.pushReplacementNamed(context, '/login');
             },
           ),
         ],
       ),
-      body: const Center(
+      body: Center(
         child: Text('Swipe cards will go here.'),
       ),
     );

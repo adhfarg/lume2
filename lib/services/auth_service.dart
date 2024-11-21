@@ -1,35 +1,28 @@
 import 'package:flutter/foundation.dart';
 
-class User {
-  final String uid;
-  final String? email;
-  final String? phoneNumber;
-  final String? displayName;
+class AuthService extends ChangeNotifier {
+  String? _userId;
+  String? _userEmail;
 
-  User({required this.uid, this.email, this.phoneNumber, this.displayName});
-}
+  bool get isAuthenticated => _userId != null;
 
-class AuthService with ChangeNotifier {
-  User? _currentUser;
+  String? get currentUserId => _userId;
+  String? get currentUserEmail => _userEmail;
 
-  User? get currentUser => _currentUser;
-
-  bool get isAuthenticated => _currentUser != null;
-
-  Future<void> signIn(String email, String password) async {
-    // TODO: Implement actual authentication logic
-    // For now, we'll just simulate a successful login
-    _currentUser = User(
-      uid: '123',
-      email: email,
-      displayName: 'John Doe',
-    );
-    notifyListeners();
+  Future<bool> signIn(String email, String password) async {
+    // Demo login
+    if (email == 'Adam' && password == '1127') {
+      _userId = 'demo_user_id';
+      _userEmail = email;
+      notifyListeners();
+      return true;
+    }
+    return false;
   }
 
-  Future<void> signOut() async {
-    // TODO: Implement actual sign out logic
-    _currentUser = null;
+  void signOut() {
+    _userId = null;
+    _userEmail = null;
     notifyListeners();
   }
 }
