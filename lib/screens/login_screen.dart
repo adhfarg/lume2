@@ -23,21 +23,17 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Lumé',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple,
-                ),
-                textAlign: TextAlign.center,
+              Image.asset(
+                'assets/images/Lumé.png',
+                height: 185,
+                fit: BoxFit.contain,
               ),
               SizedBox(height: 8),
               Text(
                 'Certified Safe Dating',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey[600],
+                  color: Colors.black54,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -46,11 +42,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _usernameController,
                 decoration: InputDecoration(
                   labelText: 'Username',
+                  labelStyle: TextStyle(color: Colors.black54),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Color(0xFFE8E6E1)),
                   ),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Color(0xFFE8E6E1)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Color(0xFFC8C6C3)),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
               ),
               SizedBox(height: 16),
@@ -59,11 +65,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Password',
+                  labelStyle: TextStyle(color: Colors.black54),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Color(0xFFE8E6E1)),
                   ),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Color(0xFFE8E6E1)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Color(0xFFC8C6C3)),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
               ),
               SizedBox(height: 24),
@@ -84,9 +100,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  foregroundColor:
-                      Colors.white, // This ensures white text color
+                  backgroundColor: Color(0xFFE8E6E1),
+                  foregroundColor: Colors.black,
+                  elevation: 0,
                   padding: EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -97,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white, // Explicitly set text color to white
+                    color: Colors.black,
                   ),
                 ),
               ),
@@ -109,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Text(
                   'Use phone number instead',
                   style: TextStyle(
-                    color: Colors.deepPurple,
+                    color: Colors.black54,
                     fontSize: 14,
                   ),
                 ),
