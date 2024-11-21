@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import 'health_certification_screen.dart';
+import 'settings_screen.dart';
+import 'help_support_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final sandColor = Color(0xFFE8E6E1);
@@ -58,7 +60,12 @@ class ProfileScreen extends StatelessWidget {
               title: Text('Settings'),
               trailing: Icon(Icons.chevron_right),
               onTap: () {
-                // TODO: Implement settings screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsScreen(),
+                  ),
+                );
               },
             ),
             Divider(color: sandColor),
@@ -67,7 +74,12 @@ class ProfileScreen extends StatelessWidget {
               title: Text('Help & Support'),
               trailing: Icon(Icons.chevron_right),
               onTap: () {
-                // TODO: Implement help & support
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HelpSupportScreen(),
+                  ),
+                );
               },
             ),
             Divider(color: sandColor),
