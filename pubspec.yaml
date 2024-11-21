@@ -1,0 +1,37 @@
+name: lume
+description: "A dating app with certified health checks"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  provider: ^6.0.5
+  http: ^1.1.0
+  shared_preferences: ^2.2.2
+  dio: ^5.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Uncomment and add paths to your assets here:
+  # assets:
+  #   - images/
+
+  # Uncomment and add custom fonts here if needed:
+  # fonts:
+  #   - family: CustomFont
+  #     fonts:
+  #       - asset: fonts/CustomFont-Regular.ttf
+  #       - asset: fonts/CustomFont-Bold.ttf
+  #         weight: 700
