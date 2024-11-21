@@ -19,10 +19,13 @@ class ProfileScreen extends StatelessWidget {
             CircleAvatar(
               radius: 50,
               backgroundColor: sandColorLight,
-              child: Icon(
-                Icons.person,
-                size: 50,
-                color: Color(0xFFE8E6E1),
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/images/user1.jpg',
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             SizedBox(height: 16),
