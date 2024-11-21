@@ -143,6 +143,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final authService = Provider.of<AuthService>(context);
     final matchingService = Provider.of<MatchingService>(context);
 
+    final sandColor = Color(0xFFE8E6E1);
+    final sandColorLight = Color(0xFFF5F3F0);
+
     final List<Widget> screens = [
       Column(
         children: [
@@ -195,11 +198,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Container(
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.deepPurple.shade50,
+                color: sandColorLight,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.health_and_safety,
-                  color: Colors.deepPurple, size: 20),
+              child:
+                  Icon(Icons.health_and_safety, color: Colors.black, size: 20),
             ),
             onPressed: () {
               Navigator.push(
@@ -210,11 +213,11 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           IconButton(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.person, color: Colors.black),
             onPressed: () => setState(() => _currentIndex = 3),
           ),
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: Icon(Icons.logout, color: Colors.black),
             onPressed: () {
               authService.signOut();
               Navigator.pushReplacementNamed(context, '/login');
@@ -223,19 +226,36 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.local_fire_department), label: 'Discover'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.grid_view), label: 'Matches'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble), label: 'Messages'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor: Colors.white,
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) => setState(() => _currentIndex = index),
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: Colors.black,
+          unselectedItemColor: Colors.black54,
+          showUnselectedLabels: true,
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.local_fire_department),
+              label: 'Discover',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.grid_view),
+              label: 'Matches',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble),
+              label: 'Messages',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ],
+        ),
       ),
     );
   }
