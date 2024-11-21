@@ -192,6 +192,24 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         actions: [
           IconButton(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.health_and_safety,
+                  color: Colors.deepPurple, size: 20),
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => HealthCertificationScreen()),
+              );
+            },
+          ),
+          IconButton(
             icon: Icon(Icons.person),
             onPressed: () => setState(() => _currentIndex = 3),
           ),
@@ -218,17 +236,6 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icon(Icons.chat_bubble), label: 'Messages'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => HealthCertificationScreen()),
-          );
-        },
-        child: Icon(Icons.health_and_safety),
-        tooltip: 'Health Certification',
       ),
     );
   }
