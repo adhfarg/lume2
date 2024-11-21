@@ -6,6 +6,8 @@ import '../services/matching_service.dart';
 import '../models/user_model.dart';
 import 'profile_screen.dart';
 import 'health_certification_screen.dart';
+import 'matches_screen.dart';
+import 'messages_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -180,8 +182,8 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildActionButtons(),
         ],
       ),
-      Center(child: Text('Matches Screen')),
-      Center(child: Text('Messages Screen')),
+      MatchesScreen(),
+      MessagesScreen(),
       ProfileScreen(),
     ];
 
