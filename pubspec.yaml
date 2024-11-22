@@ -16,6 +16,9 @@ dependencies:
   card_swiper: ^2.0.4
   dio: ^5.3.2
   image_picker: ^1.0.4
+  firebase_core: ^2.15.1
+  firebase_auth: ^4.9.0
+  google_sign_in: ^6.1.5
 
 dev_dependencies:
   flutter_test:
@@ -31,3 +34,5 @@ flutter:
     - assets/images/user3.jpg
     - assets/images/user4.jpg
     - assets/images/user5.jpg
+    - assets/images/google_logo.png
+    - assets/images/apple_logo.png

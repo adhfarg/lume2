@@ -86,9 +86,23 @@ class ProfileScreen extends StatelessWidget {
             ListTile(
               leading: Icon(Icons.logout, color: Colors.red),
               title: Text('Logout'),
-              onTap: () {
-                authService.signOut();
-                Navigator.pushReplacementNamed(context, '/login');
+              onTap: () async {
+                try {
+                  await authService.signOut();
+                  // Use pushNamedAndRemoveUntil to clear the navigation stack
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/login',
+                    (route) => false, // This removes all previous routes
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error signing out. Please try again.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               },
             ),
           ],

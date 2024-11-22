@@ -80,13 +80,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildActionButtons() {
+    final matchingService =
+        Provider.of<MatchingService>(context, listen: false);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildActionButton(
-            onTap: () => _swiperController.previous(),
+            onTap: () {
+              matchingService.refreshMatches();
+              _swiperController.move(0);
+            },
             icon: Icons.refresh,
             color: Colors.amber,
           ),

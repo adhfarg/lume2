@@ -1,6 +1,7 @@
+import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
 
-class MatchingService {
+class MatchingService with ChangeNotifier {
   List<User> _demoUsers = [
     User(
       id: 'user1',
@@ -53,5 +54,13 @@ class MatchingService {
     // Simulating a short delay
     await Future.delayed(Duration(milliseconds: 500));
     return _demoUsers;
+  }
+
+  // Add a method to refresh matches (for demonstration purposes)
+  void refreshMatches() {
+    // In a real app, you might fetch new matches from an API here
+    // For now, we'll just shuffle the existing list
+    _demoUsers.shuffle();
+    notifyListeners();
   }
 }

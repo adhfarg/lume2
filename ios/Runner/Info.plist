@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Lume</string>
+	<string>Lumé</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -49,5 +49,17 @@
 	<string>We need access to your photos to upload test results.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>We need access to your camera to take photos of test results.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.554129475820-3662e65e085bd171aa7dc9</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
+
