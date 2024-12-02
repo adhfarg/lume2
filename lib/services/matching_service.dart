@@ -1,6 +1,7 @@
+import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
 
-class MatchingService {
+class MatchingService extends ChangeNotifier {
   List<User> _demoUsers = [
     User(
       id: 'user1',
@@ -49,9 +50,24 @@ class MatchingService {
     ),
   ];
 
+  List<User> get demoUsers => _demoUsers;
+
   Future<List<User>> getPotentialMatches() async {
     // Simulating a short delay
     await Future.delayed(Duration(milliseconds: 500));
     return _demoUsers;
+  }
+
+  void updateUser(User updatedUser) {
+    final index = _demoUsers.indexWhere((user) => user.id == updatedUser.id);
+    if (index != -1) {
+      _demoUsers[index] = updatedUser;
+      notifyListeners();
+    }
+  }
+
+  void removeUser(String userId) {
+    _demoUsers.removeWhere((user) => user.id == userId);
+    notifyListeners();
   }
 }

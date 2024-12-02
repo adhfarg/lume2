@@ -1,58 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../services/matching_service.dart';
+import '../models/user_model.dart';
 
-class MatchesScreen extends StatefulWidget {
-  @override
-  _MatchesScreenState createState() => _MatchesScreenState();
-}
-
-class _MatchesScreenState extends State<MatchesScreen> {
-  List<Map<String, dynamic>> matches = [
-    {
-      'id': 'user1',
-      'name': 'Alice',
-      'age': 28,
-      'lastSeen': 'Online',
-    },
-    {
-      'id': 'user2',
-      'name': 'Bob',
-      'age': 32,
-      'lastSeen': '2h ago',
-    },
-    {
-      'id': 'user3',
-      'name': 'Charlie',
-      'age': 25,
-      'lastSeen': '1h ago',
-    },
-    {
-      'id': 'user4',
-      'name': 'Diana',
-      'age': 30,
-      'lastSeen': 'Online',
-    },
-    {
-      'id': 'user5',
-      'name': 'Ethan',
-      'age': 27,
-      'lastSeen': '30m ago',
-    },
-  ];
-
-  void _removeMatch(String id) {
-    setState(() {
-      matches.removeWhere((match) => match['id'] == id);
-      // TODO: Also remove corresponding messages
-    });
-  }
-
-  void _confirmMatch(String id) {
-    // TODO: Implement confirmation logic
-  }
-
+class MatchesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final matchingService =
+        Provider.of<MatchingService>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -65,117 +21,140 @@ class _MatchesScreenState extends State<MatchesScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: GridView.builder(
-        padding: EdgeInsets.fromLTRB(12, 12, 12, 80),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.75,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-        ),
-        itemCount: matches.length,
-        itemBuilder: (context, index) {
-          final match = matches[index];
-          return AnimatedOpacity(
-            duration: Duration(milliseconds: 300),
-            opacity: 1.0,
-            child: Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius:
-                              BorderRadius.vertical(top: Radius.circular(12)),
-                          child: Image.asset(
-                            'assets/images/${match['id']}.jpg',
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                          ),
-                        ),
-                      ],
-                    ),
+      body: FutureBuilder<List<User>>(
+        future: matchingService.getPotentialMatches(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No matches found'));
+          }
+
+          final matches = snapshot.data!;
+
+          return GridView.builder(
+            padding: EdgeInsets.fromLTRB(12, 12, 12, 80),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.75,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            itemCount: matches.length,
+            itemBuilder: (context, index) {
+              final match = matches[index];
+              return AnimatedOpacity(
+                duration: Duration(milliseconds: 300),
+                opacity: 1.0,
+                child: Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Stack(
                           children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${match['name']}, ${match['age']}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Row(
+                            ClipRRect(
+                              borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(12)),
+                              child: Image.asset(
+                                'assets/images/${match.id}.jpg',
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Container(
-                                        width: 8,
-                                        height: 8,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: match['lastSeen'] == 'Online'
-                                              ? Colors.green
-                                              : Colors.grey,
+                                      Text(
+                                        '${match.name}, ${match.age}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
                                         ),
                                       ),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        match['lastSeen'],
-                                        style: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 12,
-                                        ),
+                                      SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 8,
+                                            height: 8,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: match.isCertified
+                                                  ? Colors.green
+                                                  : Colors.grey,
+                                            ),
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            match.isCertified
+                                                ? 'Certified'
+                                                : 'Not Certified',
+                                            style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
-                            ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                _buildActionButton(
-                                  onTap: () => _removeMatch(match['id']),
-                                  icon: Icons.close,
-                                  backgroundColor: Colors.red.withOpacity(0.1),
-                                  iconColor: Colors.red,
                                 ),
-                                SizedBox(width: 4),
-                                _buildActionButton(
-                                  onTap: () => _confirmMatch(match['id']),
-                                  icon: Icons.favorite,
-                                  backgroundColor:
-                                      Colors.green.withOpacity(0.1),
-                                  iconColor: Colors.green,
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _buildActionButton(
+                                      onTap: () =>
+                                          _removeMatch(context, match.id),
+                                      icon: Icons.close,
+                                      backgroundColor:
+                                          Colors.red.withOpacity(0.1),
+                                      iconColor: Colors.red,
+                                    ),
+                                    SizedBox(width: 4),
+                                    _buildActionButton(
+                                      onTap: () =>
+                                          _confirmMatch(context, match.id),
+                                      icon: Icons.favorite,
+                                      backgroundColor:
+                                          Colors.green.withOpacity(0.1),
+                                      iconColor: Colors.green,
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
       ),
@@ -202,6 +181,20 @@ class _MatchesScreenState extends State<MatchesScreen> {
           color: iconColor,
         ),
       ),
+    );
+  }
+
+  void _removeMatch(BuildContext context, String id) {
+    // TODO: Implement remove match logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Removed match with ID: $id')),
+    );
+  }
+
+  void _confirmMatch(BuildContext context, String id) {
+    // TODO: Implement confirm match logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Confirmed match with ID: $id')),
     );
   }
 }

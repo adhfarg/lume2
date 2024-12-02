@@ -143,7 +143,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
-    final matchingService = Provider.of<MatchingService>(context);
+    final matchingService =
+        Provider.of<MatchingService>(context, listen: false);
 
     final sandColor = Color(0xFFE8E6E1);
     final sandColorLight = Color(0xFFF5F3F0);

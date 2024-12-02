@@ -3,16 +3,19 @@ import 'package:provider/provider.dart' as provider;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
 
-class LoginScreen extends StatefulWidget {
+class SignUpScreen extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _SignUpScreenState createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _birthdayController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
+  DateTime? _selectedDate;
 
   void _clearError() {
     setState(() {
@@ -20,41 +23,58 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  Future<void> _handleLogin() async {
-    await _handleAuthAction(() async {
-      final authService =
-          provider.Provider.of<AuthService>(context, listen: false);
-      await authService.signIn(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
-      Navigator.pushReplacementNamed(context, '/home');
-    });
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate:
+          DateTime.now().subtract(Duration(days: 6570)), // 18 years ago
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Color(0xFFE8E6E1),
+              onPrimary: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+        _birthdayController.text =
+            "${picked.month}/${picked.day}/${picked.year}";
+      });
+    }
+  }
+
+  bool _isAtLeast18YearsOld() {
+    if (_selectedDate == null) return false;
+    final today = DateTime.now();
+    final difference = today.difference(_selectedDate!);
+    return difference.inDays >= 6570; // 18 years in days
   }
 
   Future<void> _handleSignUp() async {
-    await _handleAuthAction(() async {
-      final authService =
-          provider.Provider.of<AuthService>(context, listen: false);
-      await authService.signUp(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please check your email to confirm your account'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    });
-  }
-
-  Future<void> _handleAuthAction(Future<void> Function() action) async {
     _clearError();
 
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+    // Validate all fields
+    if (_nameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        _birthdayController.text.isEmpty) {
       setState(() {
         _errorMessage = 'Please fill in all fields';
+      });
+      return;
+    }
+
+    if (!_isAtLeast18YearsOld()) {
+      setState(() {
+        _errorMessage = 'You must be at least 18 years old to sign up';
       });
       return;
     }
@@ -64,7 +84,21 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await action();
+      final authService =
+          provider.Provider.of<AuthService>(context, listen: false);
+      await authService.signUp(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please check your email to confirm your account'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.pop(context); // Return to login screen
     } on AuthException catch (error) {
       setState(() {
         _errorMessage = error.message;
@@ -83,30 +117,64 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Sign Up',
+          style: TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32.0),
+            padding: EdgeInsets.all(32.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(height: 48),
                 Image.asset(
                   'assets/images/Lumé.png',
-                  height: 200,
+                  height: 150,
                   fit: BoxFit.contain,
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'Certified Safe Dating',
+                  'Create Your Account',
                   style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black54,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 48),
+                SizedBox(height: 32),
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    labelText: 'Full Name',
+                    labelStyle: TextStyle(color: Colors.black54),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Color(0xFFE8E6E1)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Color(0xFFE8E6E1)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Color(0xFFC8C6C3)),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  onChanged: (_) => _clearError(),
+                ),
+                SizedBox(height: 16),
                 TextField(
                   controller: _emailController,
                   decoration: InputDecoration(
@@ -133,7 +201,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: 16),
                 TextField(
                   controller: _passwordController,
-                  obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'Password',
                     labelStyle: TextStyle(color: Colors.black54),
@@ -152,7 +219,36 @@ class _LoginScreenState extends State<LoginScreen> {
                     filled: true,
                     fillColor: Colors.white,
                   ),
+                  obscureText: true,
                   onChanged: (_) => _clearError(),
+                ),
+                SizedBox(height: 16),
+                GestureDetector(
+                  onTap: () => _selectDate(context),
+                  child: AbsorbPointer(
+                    child: TextField(
+                      controller: _birthdayController,
+                      decoration: InputDecoration(
+                        labelText: 'Birthday',
+                        labelStyle: TextStyle(color: Colors.black54),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Color(0xFFE8E6E1)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Color(0xFFE8E6E1)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Color(0xFFC8C6C3)),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        suffixIcon: Icon(Icons.calendar_today),
+                      ),
+                    ),
+                  ),
                 ),
                 SizedBox(height: 24),
                 if (_errorMessage != null)
@@ -168,7 +264,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ElevatedButton(
-                  onPressed: _isLoading ? null : _handleLogin,
+                  onPressed: _isLoading ? null : _handleSignUp,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFE8E6E1),
                     foregroundColor: Colors.black,
@@ -189,47 +285,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         )
                       : Text(
-                          'Log In',
+                          'Create Account',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
                         ),
-                ),
-                SizedBox(height: 16),
-                TextButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content:
-                                  Text('Phone authentication coming soon!'),
-                            ),
-                          );
-                        },
-                  child: Text(
-                    'Use phone number instead',
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () {
-                          Navigator.pushNamed(context, '/signup');
-                        },
-                  child: Text(
-                    'Sign Up',
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 14,
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -241,8 +303,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _birthdayController.dispose();
     super.dispose();
   }
 }
