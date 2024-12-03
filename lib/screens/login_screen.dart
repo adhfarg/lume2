@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
+import 'password_reset_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -31,48 +32,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       Navigator.pushReplacementNamed(context, '/home');
     });
-  }
-
-  Future<void> _handleForgotPassword() async {
-    final email = _emailController.text.trim();
-
-    if (email.isEmpty) {
-      setState(() {
-        _errorMessage = 'Please enter your email address';
-      });
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await _supabase.auth.resetPasswordForEmail(
-        email,
-        redirectTo: 'io.supabase.flutterquickstart://reset-callback/',
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Password reset instructions sent to your email'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } on AuthException catch (error) {
-      setState(() {
-        _errorMessage = error.message;
-      });
-    } catch (error) {
-      setState(() {
-        _errorMessage = 'An unexpected error occurred';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
 
   Future<void> _handleSignUp() async {
@@ -200,7 +159,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: _isLoading ? null : _handleForgotPassword,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PasswordResetScreen()),
+                      );
+                    },
                     child: Text(
                       'Forgot Password?',
                       style: TextStyle(
