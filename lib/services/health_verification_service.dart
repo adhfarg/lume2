@@ -5,58 +5,36 @@ import '../config/app_config.dart';
 class HealthVerificationService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  Future<void> _ensureStorageAccess() async {
-    try {
-      // Test storage access
-      await _supabase.storage.getBucket(AppConfig.storageBucket);
-    } catch (e) {
-      if (e is StorageException && e.statusCode == 404) {
-        // Bucket doesn't exist, try to create it
-        try {
-          await _supabase.storage.createBucket(
-            AppConfig.storageBucket,
-            const BucketOptions(
-              public: false,
-              fileSizeLimit: '5242880',
-            ),
-          );
-        } catch (createError) {
-          throw Exception('Failed to create storage bucket: $createError');
-        }
-      } else {
-        throw Exception('Storage access error: $e');
-      }
-    }
-  }
-
   Future<String> submitHealthCertification(
       String userId, Map<String, dynamic> data, String filePath) async {
     try {
-      // Ensure storage access before proceeding
-      await _ensureStorageAccess();
+      print('Starting health certification submission for user: $userId');
 
-      // Create a unique file path
       final extension = filePath.split('.').last;
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final fileName = 'certifications/$userId/$timestamp.$extension';
+      final fileName = '$userId/$timestamp.$extension';
+      print('Preparing to upload file: $fileName');
 
-      // Upload file to Supabase storage
+      // Upload file
       await _supabase.storage.from(AppConfig.storageBucket).upload(
             fileName,
             File(filePath),
             fileOptions: const FileOptions(
               cacheControl: '3600',
-              upsert: false,
+              upsert: true,
             ),
           );
+      print('File uploaded successfully.');
 
-      // Get the file URL
+      // Get file URL
       final fileUrl = await _supabase.storage
           .from(AppConfig.storageBucket)
-          .createSignedUrl(fileName, 60 * 60 * 24 * 90); // 90 days
+          .createSignedUrl(fileName, 60 * 60 * 24 * 90);
+      print('Signed URL created successfully.');
 
-      // Store certification data
-      final response = await _supabase.from('health_certifications').insert({
+      // Store in database
+      final response =
+          await _supabase.from(AppConfig.healthCertificationsTable).insert({
         'user_id': userId,
         'data': data,
         'file_path': fileName,
@@ -66,18 +44,13 @@ class HealthVerificationService {
       }).select();
 
       if (response.isNotEmpty) {
+        print('Certification submitted successfully. ID: ${response[0]['id']}');
         return response[0]['id'];
       } else {
         throw Exception('Failed to submit certification data');
       }
-    } on StorageException catch (e) {
-      print('Storage error details: ${e.message}, Status: ${e.statusCode}');
-      throw Exception('Storage error: ${e.message}');
-    } on PostgrestException catch (e) {
-      print('Database error details: ${e.message}');
-      throw Exception('Database error: ${e.message}');
     } catch (e) {
-      print('Unexpected error: $e');
+      print('Error submitting certification: $e');
       throw Exception('Error submitting certification: $e');
     }
   }
